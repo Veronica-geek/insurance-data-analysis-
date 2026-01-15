@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Claims Analytics Dashboard - Veronica Kinyua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-bottom: 4px solid #4f46e5;
+            color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .gradient-bg {
+            background: linear-gradient(to bottom right, #f8fafc, #dbeafe, #e0e7ff);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-indigo-600">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-1">
+                        Insurance Claims Analytics Dashboard
+                    </h1>
+                    <p class="text-lg text-indigo-600 font-medium">
+                        Company Performance vs IRA Industry Benchmarks
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Analyst</p>
+                    <p class="text-xl font-semibold text-gray-900">Veronica Kinyua</p>
+                    <p class="text-sm text-gray-500 mt-1">Q4 2024 - Q1 2025</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-sm font-medium text-gray-600">Avg Payment Ratio</p>
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">48.6%</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-sm font-medium text-gray-600">Liability Gap</p>
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">-2.6pp</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-sm font-medium text-gray-600">Non-Liability Performance</p>
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">+2.6pp</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
+                <p class="text-sm font-medium text-gray-600 mb-2">Outstanding Claims</p>
+                <p class="text-3xl font-bold text-gray-900">245K</p>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-white rounded-xl shadow-md mb-8">
+            <div class="flex border-b border-gray-200">
+                <button onclick="showTab('overview')" class="tab-button active flex-1 py-4 px-6 text-center font-semibold" id="tab-overview">
+                    Overview
+                </button>
+                <button onclick="showTab('comparison')" class="tab-button flex-1 py-4 px-6 text-center font-semibold text-gray-600" id="tab-comparison">
+                    Comparison
+                </button>
+                <button onclick="showTab('correlation')" class="tab-button flex-1 py-4 px-6 text-center font-semibold text-gray-600" id="tab-correlation">
+                    Correlation
+                </button>
+                <button onclick="showTab('clustering')" class="tab-button flex-1 py-4 px-6 text-center font-semibold text-gray-600" id="tab-clustering">
+                    Clustering
+                </button>
+                <button onclick="showTab('forecast')" class="tab-button flex-1 py-4 px-6 text-center font-semibold text-gray-600" id="tab-forecast">
+                    Forecast
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        
+        <!-- Overview Tab -->
+        <div id="content-overview" class="tab-content active">
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    Payment Ratio Trends: Company vs IRA Benchmarks
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    Time series comparison showing payment settlement ratios across claim categories. 
+                    Lower liability ratios indicate slower settlement performance.
+                </p>
+                <div id="overview-chart" style="width:100%;height:500px;"></div>
+                <div class="mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="font-semibold text-red-900">Liability Claims Alert</p>
+                            <p class="text-sm text-red-700 mt-1">
+                                Company liability payment ratio (7.0%) is 2.6 percentage points below industry average (9.6%), 
+                                indicating slower settlement times for liability claims.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Tab -->
+        <div id="content-comparison" class="tab-content">
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    Category Comparison: Company vs IRA Industry
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    Side-by-side comparison of payment ratios across all claim categories for Q4 2024 - Q1 2025.
+                </p>
+                <div id="comparison-chart" style="width:100%;height:500px;"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                    <div class="p-4 bg-red-50 rounded-lg">
+                        <p class="text-sm font-medium text-gray-700">Liability</p>
+                        <p class="text-2xl font-bold text-red-600">-2.6pp</p>
+                        <p class="text-xs text-gray-600 mt-1">Below industry</p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <p class="text-sm font-medium text-gray-700">Non-Liability</p>
+                        <p class="text-2xl font-bold text-green-600">+2.6pp</p>
+                        <p class="text-xs text-gray-600 mt-1">Above industry</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-lg">
+                        <p class="text-sm font-medium text-gray-700">Long-Term</p>
+                        <p class="text-2xl font-bold text-yellow-600">-2.6pp</p>
+                        <p class="text-xs text-gray-600 mt-1">Below industry</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlation Tab -->
+        <div id="content-correlation" class="tab-content">
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    Correlation Matrix: Company vs Industry Metrics
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    Heatmap showing relationships between key performance indicators. 
+                    Darker colors indicate stronger correlations (positive or negative).
+                </p>
+                <div id="correlation-chart" style="width:100%;height:600px;"></div>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <p class="font-semibold text-blue-900 mb-2">Strong Positive Correlations</p>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Payment Ratio ↔ IRA Payment % (0.82)</li>
+                            <li>• Payment Ratio ↔ Paid Count (0.68)</li>
+                            <li>• Paid Count ↔ IRA Payment % (0.71)</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg border-l-4 border-red-500">
+                        <p class="font-semibold text-red-900 mb-2">Notable Negative Correlations</p>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Declined Ratio ↔ Closed Ratio (-0.58)</li>
+                            <li>• Outstanding Amount ↔ IRA Payment % (-0.52)</li>
+                            <li>• Outstanding Amount ↔ Payment Ratio (-0.45)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clustering Tab -->
+        <div id="content-clustering" class="tab-content">
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    Performance Clustering Analysis
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    Cluster analysis identifying performance patterns across categories. 
+                    Positive values indicate better-than-industry performance.
+                </p>
+                <div id="clustering-chart" style="width:100%;height:500px;"></div>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="font-semibold text-green-900">Outperformer</p>
+                        </div>
+                        <p class="text-sm text-gray-700">Non-Liability claims consistently exceed industry benchmarks</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="font-semibold text-yellow-900">Average Performer</p>
+                        </div>
+                        <p class="text-sm text-gray-700">Long-Term claims align closely with industry standards</p>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg border-l-4 border-red-500">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="font-semibold text-red-900">Underperformer</p>
+                        </div>
+                        <p class="text-sm text-gray-700">Liability claims require process improvement to match industry</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forecast Tab -->
+        <div id="content-forecast" class="tab-content">
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    Liability Claims: 2026 Forecast
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    Linear regression forecast for liability payment ratios through 2026, 
+                    based on historical trend analysis.
+                </p>
+                <div id="forecast-chart" style="width:100%;height:500px;"></div>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                        <h3 class="font-semibold text-gray-900 mb-3">2026 Projections</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Q1 2026</span>
+                                <span class="font-semibold text-gray-900">9.4%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Q2 2026</span>
+                                <span class="font-semibold text-gray-900">10.2%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Q3 2026</span>
+                                <span class="font-semibold text-gray-900">11.0%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Q4 2026</span>
+                                <span class="font-semibold text-gray-900">11.8%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                        <h3 class="font-semibold text-gray-900 mb-3">Trend Analysis</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Positive Trajectory</p>
+                                    <p class="text-xs text-gray-600">Payment ratio increasing by ~0.8pp per quarter</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Convergence Expected</p>
+                                    <p class="text-xs text-gray-600">Approaching industry benchmark by Q4 2026</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-sm text-gray-500 pb-8">
+            <p>Dashboard created by Veronica Kinyua | Data Source: IRA Claims Reports Q4 2024 - Q1 2025</p>
+            <p class="mt-1">Analysis Period: October 2024 - March 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        // Tab switching function
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('content-' + tabName).classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        // Overview Chart - Time Series
+        const overviewData = [
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [6.2, 7.8],
+                name: 'Company - Liability',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#ef4444', width: 3},
+                marker: {size: 10}
+            },
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [8.6, 10.5],
+                name: 'IRA - Liability',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#fca5a5', width: 2, dash: 'dash'},
+                marker: {size: 8}
+            },
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [68.5, 62.1],
+                name: 'Company - Non-Liability',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#3b82f6', width: 3},
+                marker: {size: 10}
+            },
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [66.0, 59.4],
+                name: 'IRA - Non-Liability',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#93c5fd', width: 2, dash: 'dash'},
+                marker: {size: 8}
+            },
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [72.3, 74.5],
+                name: 'Company - Long-Term',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#10b981', width: 3},
+                marker: {size: 10}
+            },
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [76.2, 75.8],
+                name: 'IRA - Long-Term',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#6ee7b7', width: 2, dash: 'dash'},
+                marker: {size: 8}
+            }
+        ];
+
+        Plotly.newPlot('overview-chart', overviewData, {
+            title: '',
+            xaxis: {title: 'Quarter'},
+            yaxis: {title: 'Payment Ratio (%)'},
+            showlegend: true,
+            legend: {x: 1.05, y: 1}
+        });
+
+        // Comparison Chart
+        const comparisonData = [
+            {
+                x: ['Liability', 'Non-Liability', 'Long-Term'],
+                y: [7.0, 65.3, 73.4],
+                name: 'Company',
+                type: 'bar',
+                marker: {color: '#3b82f6'}
+            },
+            {
+                x: ['Liability', 'Non-Liability', 'Long-Term'],
+                y: [9.6, 62.7, 76.0],
+                name: 'IRA Industry',
+                type: 'bar',
+                marker: {color: '#f97316'}
+            }
+        ];
+
+        Plotly.newPlot('comparison-chart', comparisonData, {
+            title: '',
+            xaxis: {title: 'Category'},
+            yaxis: {title: 'Payment Ratio (%)'},
+            barmode: 'group'
+        });
+
+        // Correlation Heatmap
+        const correlationData = [{
+            z: [
+                [1.00, -0.32, 0.15, 0.68, -0.45, 0.82],
+                [-0.32, 1.00, -0.58, -0.18, 0.42, -0.28],
+                [0.15, -0.58, 1.00, 0.25, -0.35, 0.12],
+                [0.68, -0.18, 0.25, 1.00, -0.32, 0.71],
+                [-0.45, 0.42, -0.35, -0.32, 1.00, -0.52],
+                [0.82, -0.28, 0.12, 0.71, -0.52, 1.00]
+            ],
+            x: ['Payment Ratio', 'Declined Ratio', 'Closed Ratio', 'Paid Count', 'Outstanding Amt', 'IRA Payment %'],
+            y: ['Payment Ratio', 'Declined Ratio', 'Closed Ratio', 'Paid Count', 'Outstanding Amt', 'IRA Payment %'],
+            type: 'heatmap',
+            colorscale: 'RdBu',
+            reversescale: true,
+            zmid: 0,
+            text: [
+                ['1.00', '-0.32', '0.15', '0.68', '-0.45', '0.82'],
+                ['-0.32', '1.00', '-0.58', '-0.18', '0.42', '-0.28'],
+                ['0.15', '-0.58', '1.00', '0.25', '-0.35', '0.12'],
+                ['0.68', '-0.18', '0.25', '1.00', '-0.32', '0.71'],
+                ['-0.45', '0.42', '-0.35', '-0.32', '1.00', '-0.52'],
+                ['0.82', '-0.28', '0.12', '0.71', '-0.52', '1.00']
+            ],
+            texttemplate: '%{text}',
+            textfont: {size: 12},
+            showscale: true
+        }];
+
+        Plotly.newPlot('correlation-chart', correlationData, {
+            title: '',
+            xaxis: {side: 'bottom'},
+            yaxis: {autorange: 'reversed'}
+        });
+
+        // Clustering Chart
+        const clusteringData = [
+            {
+                x: [-2.6, 2.6, -2.6],
+                y: [0.5, -0.2, 0.1],
+                mode: 'markers',
+                type: 'scatter',
+                name: '2024Q4',
+                text: ['Liability - Underperformer', 'Non-Liability - Outperformer', 'Long-Term - Average'],
+                marker: {
+                    size: 15,
+                    color: ['#ef4444', '#22c55e', '#eab308']
+                }
+            },
+            {
+                x: [-2.7, 2.7, -1.3],
+                y: [0.3, -0.1, 0.2],
+                mode: 'markers',
+                type: 'scatter',
+                name: '2025Q1',
+                text: ['Liability - Underperformer', 'Non-Liability - Outperformer', 'Long-Term - Average'],
+                marker: {
+                    size: 15,
+                    color: ['#ef4444', '#22c55e', '#eab308'],
+                    symbol: 'diamond'
+                }
+            }
+        ];
+
+        Plotly.newPlot('clustering-chart', clusteringData, {
+            title: '',
+            xaxis: {title: 'Payment Ratio Difference (pp)', zeroline: true},
+            yaxis: {title: 'Declined Ratio Difference (pp)', zeroline: true}
+        });
+
+        // Forecast Chart
+        const forecastData = [
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [6.2, 7.8],
+                name: 'Actual (Company)',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#3b82f6', width: 3},
+                marker: {size: 10}
+            },
+            {
+                x: ['2025Q1', '2026Q1', '2026Q2', '2026Q3', '2026Q4'],
+                y: [7.8, 9.4, 10.2, 11.0, 11.8],
+                name: 'Forecast',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#22c55e', width: 3, dash: 'dash'},
+                marker: {size: 10, symbol: 'triangle-up'}
+            },
+            {
+                x: ['2024Q4', '2025Q1'],
+                y: [8.6, 10.5],
+                name: 'IRA Benchmark',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#f97316', width: 2, dash: 'dot'},
+                marker: {size: 8}
+            }
+        ];
+
+        Plotly.newPlot('forecast-chart', forecastData, {
+            title: '',
+            xaxis: {title: 'Quarter'},
+            yaxis: {title: 'Payment Ratio (%)'}
+        });
+    </script>
+</body>
+</html>
